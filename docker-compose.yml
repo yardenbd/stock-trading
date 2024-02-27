@@ -1,0 +1,38 @@
+version: "3"
+services:
+    api-gateway:
+        build:
+            context: ./api-gateway
+            dockerfile: ./Dockerfile
+        ports:
+            - "3000:3000" # expose-to-the-world : only-in-the-docker
+        networks:
+            - backend_network
+        container_name: api-gateway
+        command: "npm run start:dev"
+        depends_on:
+            - redis
+    orderbook:
+        build:
+            context: ./orderbook
+            dockerfile: ./Dockerfile
+        container_name: orderbook
+        networks:
+            - backend_network
+        command: "npm run start:dev"
+        depends_on:
+            - redis
+    redis:
+        container_name: redis-db
+        image: redis
+        environment:
+            - REDIS_PORT=6379
+        ports:
+            - 6379:6379
+        networks:
+            - backend_network
+        restart: unless-stopped
+
+networks:
+    backend_network:
+        driver: bridge
